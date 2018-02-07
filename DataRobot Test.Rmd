@@ -344,15 +344,3 @@ TukeyHSD(x=fit1, 'DISTRICT', conf.level=0.95)
 TukeyHSD(x=fit1, 'category', conf.level=0.95)
 ```
 
-
-
-```{r}
-tail(sort(summary(res$Q2...1st..)),5)
-
-#Q1.1.
-#Q1.8
-#Q10.1
-
-summary(res$Q37..Your.total.annual.household.income)
-```
-
