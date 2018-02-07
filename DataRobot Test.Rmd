@@ -1,0 +1,358 @@
+---
+title: "Exploratory Analysis of 2016 NC Survey of Residents"
+output: html_notebook
+---
+
+```{r libraries}
+library(psych)
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+```
+
+```{r screeplot_factanal}
+#http://www.stat.cmu.edu/~cshalizi/350/2008/lectures/14/lecture-14.pdf
+screeplot.factanal <- function(fa.fit,xlab="factor",ylab="eigenvalue",...) {
+	# sum-of-squares function for repeated application
+	sosq <- function(v) {sum(v^2)}
+	# Get the matrix of loadings
+	my.loadings <- as.matrix(fa.fit$loadings)
+	# Eigenvalues can be recovered as sum of
+	# squares of each column
+	evalues <- apply(my.loadings,2,sosq)
+	plot(evalues,xlab=xlab,ylab=ylab,...)
+}
+```
+
+```{r load}
+res = read.csv("~/Downloads/2016-with-county-and-city.csv",sep=";")
+
+levels(res$DISTRICT)[levels(res$DISTRICT)==""] <- "UNKNOWN"
+
+#convert "N/A" to NA
+res[res=="N/A"] = NA
+res[res==""] = NA
+
+#examine 2 likert-scale satisfaction variables
+summary(res$Q1...01..Overall.quality.of.police.prote)
+summary(res$Q1...02..Overall.quality.of.sheriff.prot)
+
+```
+
+```{r format}
+#reduce dataset to only likert-scale survey questions, and keep identifying variables like CITY.OR.COUNTY, DISTRICT & Response.ID
+
+#transpose dataframe for use with apply function
+res.t = as.data.frame(t(res))
+
+#identify likert-scale survey questions of satisfaction
+#https://stats.stackexchange.com/questions/6187/filtering-a-dataframe
+sel = apply(res.t[,names(res.t)],1,function(row) length(grep(("Very Dissatisfied|Dissatisfied|Neutral|Satisfied|Very Satisfied"),row))>0)
+
+#order the values of these likert-scale items in original dataset
+res[,sel] = as.data.frame(lapply(res[,sel], FUN=factor, levels = c("Very Dissatisfied",
+                                              "Dissatisfied",
+                                              "Neutral",
+                                              "Satisfied",
+                                              "Very Satisfied")))
+
+#mark identifiers to keep
+sel["Response.ID"] = TRUE
+sel["Method"] = TRUE
+sel["DISTRICT"] = TRUE
+sel["CITY.OR.COUNTY"] = TRUE
+sel["geo_code"] = TRUE
+
+#subset dataframe to likert scale variables and identifiers
+res = res[,sel]
+
+#confirm that the data was not manipulated during reformatting
+summary(res$Q1...01..Overall.quality.of.police.prote)
+summary(res$Q1...02..Overall.quality.of.sheriff.prot)
+```
+
+```{r remove_zero_variance, variables}
+#remove all variables with zero variance
+zero.var <- apply(res, 2, function(x) length(unique(x)) <= 2)
+res <- res[, !zero.var]
+```
+
+```{r likert_items}
+#create record of likert-scale items in formatted dataframe from new dataframe
+
+#transpose dataframe
+res.t = as.data.frame(t(res))
+
+#create dataframe with names of likert-scale items
+#https://stats.stackexchange.com/questions/6187/filtering-a-dataframe
+likert = apply(res.t[,names(res.t)],1,function(row) length(grep(("Very Dissatisfied|Dissatisfied|Neutral|Satisfied|Very Satisfied"),row))>0)
+
+#convert likert-scale items to numerical values for EFA analysis
+res[,likert] = as.data.frame(lapply(res[,likert], FUN=as.numeric))
+
+#center values around 0
+res[,likert] = res[,likert]-3
+
+#confirm that the data was not manipulated during reformatting
+table(res$Q1...01..Overall.quality.of.police.prote)
+table(res$Q1...02..Overall.quality.of.sheriff.prot)
+```
+
+```{r randomly_select_some_columns}
+#create dataframe for EFA analysis
+res.fa = res[,likert]
+
+#randomly sample likert-scale items to perform EFA
+set.seed(123)
+res.fa.s1 = res.fa[, sample(ncol(res.fa), 35)]
+
+set.seed(1234)
+res.fa.s2 = res.fa[, sample(ncol(res.fa), 35)]
+
+set.seed(370)
+res.fa.s3 = res.fa[, sample(ncol(res.fa), 35)]
+
+set.seed(2468)
+res.fa.s4 = res.fa[, sample(ncol(res.fa), 35)]
+
+set.seed(1234)
+res.fa.s5 = res.fa[, sample(ncol(res.fa), 35)]
+
+set.seed(370)
+res.fa.s6 = res.fa[, sample(ncol(res.fa), 35)]
+```
+
+```{r factor_analysis}
+#perform EFA on each random sample of likert-scale items
+#find categories for assessment
+
+efa.res.s1 <- fa(res.fa.s1, impute="median", nfactors=10, rotate = "oblimin", fm="pa", max.iter=10000)
+screeplot.factanal(efa.res.s1)
+# 6 factors
+
+efa.res.s2 <- fa(res.fa.s2, impute="median", nfactors=10, rotate = "oblimin", fm="pa", max.iter=10000)
+screeplot.factanal(efa.res.s2)
+# 9 factors
+
+efa.res.s3 <- fa(res.fa.s3, impute="median", nfactors=10, rotate = "oblimin", fm="pa", max.iter=10000)
+screeplot.factanal(efa.res.s3)
+# 7 factors
+
+efa.res.s4 <- fa(res.fa.s4, impute="median", nfactors=10, rotate = "oblimin", fm="pa", max.iter=10000)
+screeplot.factanal(efa.res.s4)
+# 8 factors
+
+efa.res.s5 <- fa(res.fa.s5, impute="median", nfactors=10, rotate = "oblimin", fm="pa", max.iter=10000)
+screeplot.factanal(efa.res.s5)
+# 9 factors
+
+efa.res.s6 <- fa(res.fa.s6, impute="median", nfactors=10, rotate = "oblimin", fm="pa", max.iter=10000)
+screeplot.factanal(efa.res.s6)
+# 7 factors
+
+```
+
+```{r factor_analysis_nfactors, include=FALSE}
+#look at factor analysis with recommended number of factors according to scree plot
+efa.res.s1 <- fa(res.fa.s1, nfactors=6, rotate = "oblimin", fm="pa", max.iter=10000)
+print(efa.res.s1, digits=2, sort=TRUE)
+
+efa.res.s2 <- fa(res.fa.s2, nfactors=9, rotate = "oblimin", fm="pa", max.iter=10000)
+print(efa.res.s2, digits=2, sort=TRUE)
+
+efa.res.s3 <- fa(res.fa.s3, nfactors=7, rotate = "oblimin", fm="pa", max.iter=10000)
+print(efa.res.s3, digits=2, sort=TRUE)
+
+efa.res.s4 <- fa(res.fa.s4, nfactors=8, rotate = "oblimin", fm="pa", max.iter=10000)
+print(efa.res.s4, digits=2, sort=TRUE)
+
+efa.res.s5 <- fa(res.fa.s5, nfactors=9, rotate = "oblimin", fm="pa", max.iter=10000)
+print(efa.res.s5, digits=2, sort=TRUE)
+
+efa.res.s6 <- fa(res.fa.s6, nfactors=7, rotate = "oblimin", fm="pa", max.iter=10000)
+print(efa.res.s6, digits=2, sort=TRUE)
+
+```
+
+```{r define_categories}
+info = c("Q20a...01..Availability.of.information.a",
+         #"Q20a...02..Ease.of.locating.information",
+         #"Q20a...03..Your.experience.engaging.with",
+         "Q20a...04..Level.of.public.involvement.i",
+         "Q20a...05..City.efforts.to.keep.you.info",
+         "Q21a...01..Availability.of.information.a",
+         #"Q21a...02..Ease.of.locating.information",
+         "Q21a...04..Level.of.public.involvement.i",
+         "Q21a...05..County.efforts.to.keep.you.in")
+
+cust.serv = c("Q21d...03..Accuracy.of.the.information.a",
+               "Q21d...04..Time.it.took.for.your.request",
+               "Q21d...05..How.well.your.issue.was.handl",
+               "Q21d...06..The.resolution.to.your.issue.")
+
+parks.rec = c("Q1...17..Overall.quality.of.parks.and.re",
+#              "Q10..02..Condition.of.sidewalks.in.YOUR",
+#              "Q10..03..Condition.of.bicycle.facilities",
+#              "Q10..04..Mowing.and.tree.trimming.along",
+              "Q10..06..Condition.of.recreation.centers",
+              "Q10..07..Overall.appearance.of.major.ent",
+#              "Q15...04..Yard.waste..leaves.tree.limbs.",
+#              "Q19..04..Public.art.in.Durham.",
+              "Q8...01..Greenways.and.trails.",
+              "Q8...02..Outdoor.athletic.fields.and.cou",
+              "Q8...03..The.variety.of.City.recreation",
+              "Q8...04...Customer.service.provided.by.t",
+              "Q8...06..Aquatic.programs.",
+              "Q8...07..Athletic.programs.",
+              "Q8...09..Cultural.programming..e.g...eve")
+
+emergency = c("Q1...03..Overall.quality.of.fire.protect",
+              "Q1...04..Response.time.for.fire.services",
+              "Q1...05..Overall.quality.of.EMS.services")
+
+public.trans = c("Q1...09..Overall.quality.of.the.public.t",
+                 "Q12...05..Ease.of.travel.by.bus..GoDurha",
+                 "Q12...06..GoDurham.routes.and.schedules.")
+
+#image = c("Q3..05..Overall.image.of.Durham.",
+#          "Q3..03..Overall.appearance.of.Durham.")
+
+parking = c("Q12...07..Location.of.Downtown.parking.f",
+            "Q12...08..Quality.of.Downtown.parking.fa")
+
+justice.sys = c("Q1...01..Overall.quality.of.police.prote",
+                "Q7..01..Overall.police.relationship.with",
+                "Q7..02..Overall.Sheriff.s.Office.relatio",
+#                "Q7..04..Enforcement.of.traffic.safety.la",
+                "Q7..05..Local.court.system.")
+
+#public.serv = c("Q1...19..Overall.quality.of.services.pro",
+#                "Q1...20..Overall.quality.of.Public.Healt",
+#                "Q1...21..Overall.quality.of.Tax.Administ"#,
+#                "Q3..01..Overall.quality.of.services.prov",
+#                "Q3..02..Overall.quality.of.services.prov")
+
+#private.sch = c("Q1...23..Overall.quality.of.charter.scho",
+#                "Q1...24..Overall.quality.of.private.scho")
+
+waste = c("Q15...02..Curbside.recycling.services.",
+          "Q15...05..City.Waste.Disposal.Center..21",
+          "Q15...06..County.Solid.Waste.Convenience",
+          "Q15...04..Yard.waste..leaves.tree.limbs.") #moved from parks.rec
+
+
+psych::alpha(res[info]) #.94, .92
+psych::alpha(res[cust.serv]) #.95
+psych::alpha(res[parks.rec]) #.91, .93
+psych::alpha(res[emergency]) #.85 #could drop Q1.02, .89
+psych::alpha(res[public.trans]) #.87
+#psych::alpha(res[image]) #.78
+psych::alpha(res[parking]) #.88
+psych::alpha(res[justice.sys]) #.85, could drop Q1.06; .87
+#psych::alpha(res[public.serv]) #.87, could drop Q1.22; .84
+#psych::alpha(res[private.sch]) #.7
+psych::alpha(res[waste]) #.8; .83
+
+#reduce EFA dataframe to final items
+res.fa = res[c(info,cust.serv,parks.rec,emergency,public.trans,parking,justice.sys,waste)]
+
+#run EFA again with subset
+efa.res <- fa(res.fa, impute="median", nfactors=10, rotate = "oblimin", fm="pa", max.iter=10000)
+screeplot.factanal(efa.res)
+
+#EFA on subset
+efa.res <- fa(res.fa, nfactors=8, rotate = "oblimin", fm="pa", max.iter=10000)
+print(efa.res, digits=2, sort=TRUE)
+```
+
+```{r model_fit_indices}
+RMSEA = round(efa.res$RMSEA["RMSEA"],4)
+RMSEA.lower = round(efa.res$RMSEA["lower"],4)
+RMSEA.upper = round(efa.res$RMSEA["upper"],4)
+
+TLI = efa.res$TLI
+
+chi = round(efa.res$STATISTIC,4)
+chi.df = efa.res$dof
+chi.p = round(efa.res$PVAL,3)
+```
+
+```{r reduce_dataset}
+#create final dataset
+identifiers = c("Response.ID","DISTRICT","geo_code")
+res = res[c(identifiers,info,cust.serv,parks.rec,emergency,public.trans,parking,justice.sys,waste)]
+
+#,"Q37..Your.total.annual.household.income","Q32..What.is.your.age.","Q33..What.is.your.gender.","Q2...1st..")]
+
+
+```
+
+```{r aggregates}
+#calculate aggregates for each category
+res$info = rowMeans(res[info], na.rm = T)
+res$cust.serv = rowMeans(res[cust.serv], na.rm = T)
+res$parks.rec = rowMeans(res[parks.rec], na.rm = T)
+res$emergency = rowMeans(res[emergency], na.rm = T)
+res$public.trans = rowMeans(res[public.trans], na.rm = T)
+res$parking = rowMeans(res[parking], na.rm = T)
+res$justice.sys = rowMeans(res[justice.sys], na.rm = T)
+res$waste = rowMeans(res[waste], na.rm = T)
+
+#create clean dataset for visualization in Tableau
+res.csv = res[c(identifiers,"info","cust.serv","parks.rec","emergency","public.trans","parking","justice.sys","waste")]
+                
+                #,"Q37..Your.total.annual.household.income","Q32..What.is.your.age.","Q33..What.is.your.gender.","Q2...1st..")]
+
+#convert geo_code to latitude and longitude for Tableau map capabilities
+res.csv = res.csv %>% separate(geo_code, c("latitude", "longitude"), sep=",")
+
+#export dataframe to csv for use with Tableau
+write.csv(res.csv,"~/Dropbox/Applications/Jobs/DataRobot/nc.csv")
+
+#convert dataframe to long format for use with Tableau
+res.long = gather(res.csv, key = category, value = satisfaction,
+       c("info","cust.serv","parks.rec","emergency","public.trans","parking","justice.sys","waste"))
+
+#Rename categories for use with Tableau
+res.long$category[which(res.long$category=="info")] = "Availability of Information"
+res.long$category[which(res.long$category=="cust.serv")] = "Customer Service"
+res.long$category[which(res.long$category=="parks.rec")] = "Parks & Rec"
+res.long$category[which(res.long$category=="emergency")] = "Emergency Services"
+res.long$category[which(res.long$category=="public.trans")] = "Public Transportation"
+res.long$category[which(res.long$category=="parking")] = "Parking"
+res.long$category[which(res.long$category=="justice.sys")] = "Justice System"
+res.long$category[which(res.long$category=="waste")] = "Waste Management"
+
+#convert variables to factors for ANOVA and posthoc analysis
+res.long$category = factor(res.long$category)
+res.long$DISTRICT = factor(res.long$DISTRICT)
+
+#export dataframe to csv for use with Tableau
+write.csv(res.long,"~/Dropbox/Applications/Jobs/DataRobot/nc_long.csv")
+```
+
+```{r analysis}
+#perform ANOVA to identify impact of category and district on resident satisfaction
+fit <- lm(satisfaction ~ category*DISTRICT, data = res.long)
+summary(fit)
+anova(fit)
+
+#perform post-hoc analyses to identify any statistically significant differences in satisfaction
+fit1 <- aov(satisfaction ~ category*DISTRICT, data = res.long)
+
+TukeyHSD(x=fit1, 'DISTRICT', conf.level=0.95)
+TukeyHSD(x=fit1, 'category', conf.level=0.95)
+```
+
+
+
+```{r}
+tail(sort(summary(res$Q2...1st..)),5)
+
+#Q1.1.
+#Q1.8
+#Q10.1
+
+summary(res$Q37..Your.total.annual.household.income)
+```
+
