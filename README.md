@@ -1,6 +1,6 @@
 # NC-Residents
 
-**Tableau**: https://public.tableau.com/profile/kimberly.brink#!/vizhome/DataRobot-Dashboard/Dashboard1?publish=yes
+**Tableau**: https://public.tableau.com/shared/68B33QZBX?:display_count=yes
 
 ### Dataset: Raleigh, NC - 2016 Resident Survey 
 - https://opendurham.nc.gov/explore/dataset/2016-with-county-and-city/
