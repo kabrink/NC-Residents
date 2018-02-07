@@ -39,6 +39,32 @@ summary(res$Q1...02..Overall.quality.of.sheriff.prot)
 
 ```
 
+```{r resident_priorities}
+#identify the top priorities for residents
+tail(sort(summary(res$Q2...1st..)))
+tail(sort(summary(res$Q2...2nd..)))
+tail(sort(summary(res$Q2...3rd..)))
+
+#Residents shared the same top 5 concerns
+
+#1. public schools
+##q5
+
+#2. police protecion, sheriff protection
+
+#3. maintenance of city streets
+###res$Q10..01..Condition.of.streets.in.YOUR.Ne
+###res$Q25..01..Street.Improvements.
+
+#4. flow of traffic
+###res$Q1...08..Overall.flow.of.traffic.in.Durh
+
+#5. bike facilities
+###res$Q25..02..Bike.lanes.
+###res$Q13...03..There.are.enough.bike.lanes.in
+
+```
+
 ```{r format}
 #reduce dataset to only likert-scale survey questions, and keep identifying variables like CITY.OR.COUNTY, DISTRICT & Response.ID
 
@@ -342,5 +368,8 @@ fit1 <- aov(satisfaction ~ category*DISTRICT, data = res.long)
 
 TukeyHSD(x=fit1, 'DISTRICT', conf.level=0.95)
 TukeyHSD(x=fit1, 'category', conf.level=0.95)
+
+#fit <- aov(satisfaction ~ DISTRICT, data = res.long[which(res.long$category=="Parking"),])
+#TukeyHSD(x=fit, 'DISTRICT', conf.level=0.95)
 ```
 
