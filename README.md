@@ -5,7 +5,7 @@
 **Tableau**: https://public.tableau.com/shared/68B33QZBX?:display_count=yes
 
 ## Executive Summary
-- Explored data on citizen satisfaction with North Carolina government services
+- I explored data on citizen satisfaction with North Carolina government services
 - The NC government should consider improvements to public transportation, parking, and availability of government information to improve citizen satisfaction
 - The survey should be updated to include questions that address citizens’ largest concerns: public schools, police protection, city streets, traffic flow, and bike facilities.
 
