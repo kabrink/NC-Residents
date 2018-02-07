@@ -1,5 +1,7 @@
 # NC-Residents
 
+**Tableau**: https://public.tableau.com/profile/kimberly.brink#!/vizhome/DataRobot-Dashboard/Dashboard1?publish=yes
+
 ### Dataset: Raleigh, NC - 2016 Resident Survey 
 - https://opendurham.nc.gov/explore/dataset/2016-with-county-and-city/
 - 735 residents completed the survey 
