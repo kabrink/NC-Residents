@@ -16,10 +16,10 @@
 1. In general, residents are satisfied with government services that they receive (residents mostly report that they are satisfied or very satisfied with the services provided) 
 2. Public transportation, parking, and availability of government information are potential services in need of improvement (these services were ranked most poorly across residents)
 3. In general, each district is equally satisfied with its services
-   - Note that District 1 was ranked more poorly than the top performing districts (1, 2, and outlying areas); if this trend continues, District 1 may deserve more attention from the NC government in the future
+   - Note that District 1 was ranked more poorly than the top performing districts (1, 2, and outlying areas); if this trend continues, District 1 may require more attention from the NC government
 4. Dissatisfaction with public transportation and parking may be linked to geographical regions
-   - Dissatisfaction with public transportation is higher outside of the county center
-   - Dissatisfaction with parking is higher near the county center
+   - Dissatisfaction with public transportation appears higher outside of the county center
+   - Dissatisfaction with parking appears higher near the county center
 
 ### What I did
 1. ***Selected a dataset*** that most closely resembles one type of DataRobot’s HR data (i.e., survey measures of satisfaction)
@@ -30,12 +30,12 @@
 
 ### How I did it
 1. ***Reduced data (R)*** 
-   - Using Exploratory Factor Analysis (EFA), I reduced a dataset of 192 variables into 8 meaningful categories of government services. Unlike other forms of dimension reduction, EFA can provide meaningful explanatory information about a dataset. This method will likely be important for better understanding DataRobot’s expansive HR data by reducing that data into fewer meaningful categories and allowing stakeholders to more precisely and accurately direct their efforts toward improvement. 
+   - Using Exploratory Factor Analysis (EFA), I reduced a dataset of 192 variables into 8 categories of government services. Unlike other forms of dimension reduction, EFA can identify meaningful and descriptive categories of data within a dataset. 
 2. ***Extracted categories (R)***
    - After identifying 8 categories using EFA, I created aggregate measures of satisfaction for these categories.  
 3. ***Visualized satisfaction (Tableau)*** 
    - I created a plot of satisfaction by government service to identify any problem areas (i.e., which services show substantially less satisfaction) (See “1. Satisfaction” in dashboard)
-   - I created a plot of satisfaction by district to identify whether any specific districts were performing substantially more poorly than any other district (See “3. Satisfaction by District” in dashboard)
-   - I plotted satisfaction by geographical location to see whether any specific geographical area was performing poorly with respect to a certain government service (See “2. Satisfaction - Durham, NC” in dashboard)
+   - I created a plot of satisfaction by district to identify whether any specific districts were performing more poorly than any other district (See “3. Satisfaction by District” in dashboard)
+   - I plotted satisfaction by geographical location to see whether any specific geographical area was performing poorly in a certain government service (See “2. Satisfaction - Durham, NC” in dashboard)
 4. ***Analyzed differences (R)***
    - Using ANOVA and post-hoc tests, I analyzed whether there were any categories or districts that had significantly lower ratings of satisfaction
