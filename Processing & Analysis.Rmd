@@ -102,12 +102,8 @@ res <- res[, !zero.var]
 ```{r likert_items}
 #create record of likert-scale items in formatted dataframe from new dataframe
 
-#transpose dataframe
-res.t = as.data.frame(t(res))
-
 #create dataframe with names of likert-scale items
-#https://stats.stackexchange.com/questions/6187/filtering-a-dataframe
-likert = apply(res.t[,names(res.t)],1,function(row) length(grep(("Very Dissatisfied|Dissatisfied|Neutral|Satisfied|Very Satisfied"),row))>0)
+likert = apply(res,2,function(row) length(grep(("Very Dissatisfied|Dissatisfied|Neutral|Satisfied|Very Satisfied"),row))>0)
 
 #convert likert-scale items to numerical values for EFA analysis
 res[,likert] = as.data.frame(lapply(res[,likert], FUN=as.numeric))
