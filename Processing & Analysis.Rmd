@@ -68,12 +68,8 @@ tail(sort(summary(res$Q2...3rd..)))
 ```{r format}
 #reduce dataset to only likert-scale survey questions, and keep identifying variables like CITY.OR.COUNTY, DISTRICT & Response.ID
 
-#transpose dataframe for use with apply function
-res.t = as.data.frame(t(res))
-
 #identify likert-scale survey questions of satisfaction
-#https://stats.stackexchange.com/questions/6187/filtering-a-dataframe
-sel = apply(res.t[,names(res.t)],1,function(row) length(grep(("Very Dissatisfied|Dissatisfied|Neutral|Satisfied|Very Satisfied"),row))>0)
+sel = apply(res,2,function(row) length(grep(("Very Dissatisfied|Dissatisfied|Neutral|Satisfied|Very Satisfied"),row))>0)
 
 #order the values of these likert-scale items in original dataset
 res[,sel] = as.data.frame(lapply(res[,sel], FUN=factor, levels = c("Very Dissatisfied",
